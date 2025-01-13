@@ -44,22 +44,18 @@ Cheat sheet:
       4. Reload settings by running `sudo systemctl reload ssh`
       5. On local machine add private keys with `ssh-add PATH_TO_PRIVATE_CERT_FILE`
       6. Connect to the vps without password `ssh USER_NAME@IP`
-   2. Install `sudo apt install tmux`
-      1. [needs to be detailed]
 4. Set the domain
-
    1. Buy the domain :D
    2. Config DNS, all major hosting services has nice easy one click buttons instruction how to manage that.
    3. To get the ip od the server type `ip address`
    4. Check if domain is set to server `nslookup IP`
    5. Set TLS with [certbot](https://certbot.eff.org/)
       1. [needs to be detailed]
-
 5. Setup firewall
    1. `sudo ufw default deny incoming`
    2. `sudo ufw default allow outgoing`
    3. Check at what port you are connected to server via SSH `echo $SSH_CLIENT` it should be 22.
-   4. **WARNING** do not block your won ssh connection, ensure you are on 22 port `sudo ufw allow 22/tcp`
+   4. **WARNING** Do not block your own SSH connection, ensure you are on 22 port `sudo ufw allow 22/tcp`
    5. `sudo ufw allow 433/tcp`
    6. See if configuration was added correctly `sudo ufw show added`
    7. Run `sudo ufw enable`
@@ -76,15 +72,15 @@ Cheat sheet:
    7. Install `nginx`
       1. [needs to be detailed]
 7. Setup repo on VPS
-   1. Set up ssh key
-   2. Create a new key as in previous steps. Paste public key to github ssh keys section.
+   1. Set up SSH key
+   2. Create a new key as in previous steps. Paste public key to github SSH keys section.
    3. Create an folder ex `mkdir ~/repos`
    4. Clone github repo into the folder
 8. Create Github auto deploy action
    1. Set envs, go to Settings -> Secrets -> Actions -> New repository secret
       `   PRIVATE_KEY = "Copy generated private key from vps to github secret"
-  HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123" 
-  USERNAME = "YOUR SERVER USERNAME, example: daniel"`
+HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123" 
+USERNAME = "YOUR SERVER USERNAME, example: daniel"`
    1. Setup action, example code:
       1. [needs to be detailed]
 
