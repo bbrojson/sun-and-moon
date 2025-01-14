@@ -16,12 +16,12 @@ The difficulty in setting up a VPS properly does't lie in the setup itself, but 
 
 Cheat sheet:
 
-0. choose VPS, install pure version of the one and only `Ubuntu`
-1. Config new user, it is good practice to not use the root account
-   1. Connect to the terminal via `ssh` command
-   2. Add new user `adduser USER_NAME`
-   3. Add user to the sudo group `usermod -aG sudo USER_NAME`
-   4. Switch to the new user `su USER_NAME`
+0. choose VPS, select distro (Debian)
+   1. Connect to VPS via ssh and update the system before we start `sudo apt update && sudo apt upgrade`
+1. Config new user, we wont use root account.
+   1. Add new user `adduser USER_NAME`
+   2. Add user to the sudo group `usermod -aG sudo USER_NAME`
+   3. Switch to the new user `su USER_NAME`
 2. Establish SSH connection via Key authentication
    1. Run `ssh-keygen` locally to generate new key
       1. ex: `ssh-keygen -t rsa -b 4096 -m PEM -C "vps-instance-connection"`
@@ -33,24 +33,58 @@ Cheat sheet:
       1. See content of authorized_keys file `cat ~/.ssh/authorized_keys`
 3. Openssh Hardening
    1. Remove password authentication on SSH
-      1. Edit config file in vim `sudo vim /etc/ssh/sshd_config`
+      1. Edit config file in vim `sudo vim /etc/ssh/sshd_config` or `sudo nano /etc/ssh/sshd_config`
       2. Change settings to:
          1. `PubkeyAuthentication yes`
          2. `PasswordAuthentication no`
          3. `PermitRootLogin no`
-         4. `UsePAM not`
          5. Change to absolute path `AuthorizedKeysFile ~/.ssh/authorized_keys`
-      3. Try to exit vim ;)
+      3. Try to exit vim or just CTRL+X in nano
       4. Reload settings by running `sudo systemctl reload ssh`
       5. On local machine add private keys with `ssh-add PATH_TO_PRIVATE_CERT_FILE`
       6. Connect to the vps without password `ssh USER_NAME@IP`
+   2. Install fail2ban
+      1. `sudo apt install fail2ban`
+      2. `sudo systemctl enable fail2ban`
+      3. `sudo systemctl start fail2ban`
+      4. `sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local`
+      5. `sudo nano /etc/fail2ban/jail.local` to configure the rules, then `sudo systemctl restart fail2ban` to restart the service
+
 4. Set the domain
    1. Buy the domain :D
    2. Config DNS, all major hosting services has nice easy one click buttons instruction how to manage that.
    3. To get the ip od the server type `ip address`
    4. Check if domain is set to server `nslookup IP`
-   5. Set TLS with [certbot](https://certbot.eff.org/)
-      1. [needs to be detailed]
+   5. Install `nginx`
+
+      1. `sudo apt install nginx certbot python3-certbot-nginx -y`
+      2. Create a basic server block (/etc/nginx/sites-available/example.com):
+
+         ```bash
+            server {
+               listen 80;
+               server_name example.com www.example.com;
+
+               root /var/www/example.com;
+               index index.html index.htm;
+
+               location / {
+                  try_files $uri $uri/ =404;
+               }
+            }
+         ```
+
+      3. Enable the site and restart NGINX:  
+         `sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/`
+         `sudo nginx -t`
+         `sudo systemctl restart nginx`
+
+   6. Set TLS with [certbot](https://certbot.eff.org/)
+      1. `sudo certbot --nginx`
+   7. Create domain folder for nginx `sudo mkdir -p /var/www/example.com`
+   8. Set permissions `sudo chown -R $USER:$USER /var/www/example.com`
+   9. Set chmod `sudo chmod -R 755 /var/www/example.com`
+
 5. Setup firewall
    1. `sudo ufw default deny incoming`
    2. `sudo ufw default allow outgoing`
@@ -58,35 +92,31 @@ Cheat sheet:
    4. **WARNING** Do not block your own SSH connection, ensure you are on 22 port `sudo ufw allow 22/tcp`
    5. `sudo ufw allow 433/tcp`
    6. See if configuration was added correctly `sudo ufw show added`
-   7. Run `sudo ufw enable`
+   7. Run `sudo ufw enable` - before double check if you are on the right port (22)
 6. Install App
-   1. Run `sudo apt update` to check if there a new versions of packages
-   2. Run `sudo apt upgrade` to install those versions
-   3. Install basic libs `sudo apt-get install curl openssl libssl-dev`
-   4. Install git `sudo apt-get install git`
-   5. Install nodejs `sudo apt install nodejs`
+   1. Install basic libs `sudo apt-get install curl openssl libssl-dev npm`
+   2. Install git `sudo apt-get install git`
+   3. Install nodejs `sudo apt install nodejs`
       1. Check nodejs version: `node -v`
       2. Check npm version: `npm -v`
-   6. Install pm2: `sudo npm install pm2 -g`
+   4. Install pm2: `sudo npm install pm2 -g`
       1. Check if pm2 is working: `pm2 list`, the list should be empty
-   7. Install `nginx`
-      1. [needs to be detailed]
 7. Setup repo on VPS
    1. Set up SSH key
-   2. Create a new key as in previous steps. Paste public key to github SSH keys section.
+   2. Create a new key as in previous steps. Paste **public key** to github SSH keys section (profile -> settings -> SSH keys).
    3. Create an folder ex `mkdir ~/repos`
    4. Clone github repo into the folder
 8. Create Github auto deploy action
    1. Set envs, go to Settings -> Secrets -> Actions -> New repository secret
-      `   PRIVATE_KEY = "Copy generated private key from vps to github secret"
-HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123" 
-USERNAME = "YOUR SERVER USERNAME, example: daniel"`
-   1. Setup action, example code:
-      1. [needs to be detailed]
+      `PRIVATE_KEY` Copy generated private key from vps to github secret
+      `HOST` YOUR SERVER ADDRESS, example: 172.41.91.123
+      `USERNAME` YOUR SERVER USERNAME, example: daniel
+      `DOMAIN_NAME` YOUR DOMAIN NAME, example: example.com
+   2. Setup action, in that case were using .github/workflows/deploy.yml file
 
-## Stack
+## Stack (needs to be updated)
 
-- VPS, ubuntu
+- VPS, debian
 - nginx
 - pm2
 - nodejs
