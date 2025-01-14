@@ -107,12 +107,14 @@ Cheat sheet:
    3. Create an folder ex `mkdir ~/repos`
    4. Clone github repo into the folder
 8. Create Github auto deploy action
-   1. Set envs, go to Settings -> Secrets -> Actions -> New repository secret
-      `PRIVATE_KEY` Copy generated private key from vps to github secret
+   1. Generate private key locally for github action `ssh-keygen -t rsa -b 4096 -C "github-actions"`
+   2. Add public key to authorized keys on vps to `~/.ssh/authorized_keys`
+   2. Set envs, go to Settings -> Secrets -> Actions -> New repository secret
+      `PRIVATE_KEY` Copy generated private key
       `HOST` YOUR SERVER ADDRESS, example: 172.41.91.123
       `USERNAME` YOUR SERVER USERNAME, example: daniel
       `DOMAIN_NAME` YOUR DOMAIN NAME, example: example.com
-   2. Setup action, in that case were using .github/workflows/deploy.yml file
+   3. Setup action, in that case were using
 
 ## Stack (needs to be updated)
 

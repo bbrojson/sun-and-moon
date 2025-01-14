@@ -10,20 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup SSH Key
+      # 2. Ustawienie klucza SSH
+      - name: Setup SSH Key and Known Hosts
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
+      # 3. Testowanie połączenia SSH
       - name: Test SSH Connection
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH Connection Successful"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH Connection Successful"
 
+      # 4. Wdrożenie kodu na VPS
       - name: Deploy to VPS
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
@@ -32,7 +37,3 @@ jobs:
             npm install --production
             pm2 restart all
           EOF
-          
-      - name: Restart NGINX
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo systemctl restart nginx"
