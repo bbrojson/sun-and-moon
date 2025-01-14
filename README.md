@@ -22,6 +22,7 @@ Cheat sheet:
    1. Add new user `adduser USER_NAME`
    2. Add user to the sudo group `usermod -aG sudo USER_NAME`
    3. Switch to the new user `su USER_NAME`
+   4. Use `sudo visudo` and add `USER_NAME ALL=(ALL) ALL` to the end of the file
 2. Establish SSH connection via Key authentication
    1. Run `ssh-keygen` locally to generate new key
       1. ex: `ssh-keygen -t rsa -b 4096 -m PEM -C "vps-instance-connection"`

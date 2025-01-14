@@ -28,18 +28,22 @@ jobs:
       - name: Deploy to VPS
         run: |
           ssh -T -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
-            set -e            
+            set -e
             sudo chown -R $USER:$USER /var/www/${{ secrets.DOMAIN_NAME }}
-            sudo chmod -R 755 /var/www/${{ secrets.DOMAIN_NAME }}            
-            
-            sudo rm -rf /var/www/${{ secrets.DOMAIN_NAME }}
-            
-            # Klonowanie repozytorium
-            git clone git@github.com:Adam-rGz/galvanize.git /var/www/${{ secrets.DOMAIN_NAME }}
-            
-            # Instalacja zależności i restart aplikacji
+            sudo chmod -R 755 /var/www/${{ secrets.DOMAIN_NAME }}
+
+            # Sprawdzenie, czy repozytorium istnieje
+            if [ ! -d "/var/www/${{ secrets.DOMAIN_NAME }}/.git" ]; then
+              echo "Repo does not exist. Cloning..."
+              git clone git@github.com:Adam-rGz/galvanize.git /var/www/${{ secrets.DOMAIN_NAME }}
+            else
+              echo "Repo exists. Downloading..."
+              cd /var/www/${{ secrets.DOMAIN_NAME }}
+              git fetch --all
+              git reset --hard origin/trunk
+            fi
+
             cd /var/www/${{ secrets.DOMAIN_NAME }}
             npm install --production
             pm2 restart all || pm2 start npm --name "app" -- run start
           EOF
-        
