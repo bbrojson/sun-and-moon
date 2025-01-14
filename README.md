@@ -38,7 +38,7 @@ Cheat sheet:
          1. `PubkeyAuthentication yes`
          2. `PasswordAuthentication no`
          3. `PermitRootLogin no`
-         5. Change to absolute path `AuthorizedKeysFile ~/.ssh/authorized_keys`
+         5. Set path `AuthorizedKeysFile .ssh/authorized_keys`
       3. Try to exit vim or just CTRL+X in nano
       4. Reload settings by running `sudo systemctl reload ssh`
       5. On local machine add private keys with `ssh-add PATH_TO_PRIVATE_CERT_FILE`

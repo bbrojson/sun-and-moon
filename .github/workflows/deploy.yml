@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Ustawienie klucza SSH
       - name: Setup SSH Key and Known Hosts
         run: |
           mkdir -p ~/.ssh
@@ -23,17 +21,23 @@ jobs:
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      # 3. Testowanie połączenia SSH
       - name: Test SSH Connection
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH Connection Successful"
-
-      # 4. Wdrożenie kodu na VPS
+      
       - name: Deploy to VPS
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
-            cd /var/www/${{ secrets.DOMAIN_NAME }}
-            git pull origin trunk
+          ssh -T -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+            if [ ! -d "/var/www/${{ secrets.DOMAIN_NAME }}/.git" ]; then
+              echo "Initializing repository..."
+              rm -rf /var/www/${{ secrets.DOMAIN_NAME }}
+              git clone git@github.com:YOUR_USERNAME/YOUR_REPO.git /var/www/${{ secrets.DOMAIN_NAME }}
+            else
+              echo "Repository exists. Pulling latest changes..."
+              cd /var/www/${{ secrets.DOMAIN_NAME }}
+              git pull origin trunk
+            fi
             npm install --production
-            pm2 restart all
+            pm2 restart all || pm2 start npm --name "app" -- run start
           EOF
+    
