@@ -28,16 +28,14 @@ jobs:
       - name: Deploy to VPS
         run: |
           ssh -T -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
-            set -e
-            # Naprawa uprawnień na serwerze przed usunięciem
+            set -e            
             sudo chown -R $USER:$USER /var/www/${{ secrets.DOMAIN_NAME }}
-            sudo chmod -R 755 /var/www/${{ secrets.DOMAIN_NAME }}
+            sudo chmod -R 755 /var/www/${{ secrets.DOMAIN_NAME }}            
             
-            # Usunięcie katalogu z uprawnieniami sudo
             sudo rm -rf /var/www/${{ secrets.DOMAIN_NAME }}
             
             # Klonowanie repozytorium
-            git clone git@github.com:YOUR_USERNAME/YOUR_REPO.git /var/www/${{ secrets.DOMAIN_NAME }}
+            git clone git@github.com:Adam-rGz/galvanize.git /var/www/${{ secrets.DOMAIN_NAME }}
             
             # Instalacja zależności i restart aplikacji
             cd /var/www/${{ secrets.DOMAIN_NAME }}
