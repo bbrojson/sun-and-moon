@@ -91,7 +91,7 @@ Cheat sheet:
    2. `sudo ufw default allow outgoing`
    3. Check at what port you are connected to server via SSH `echo $SSH_CLIENT` it should be 22.
    4. **WARNING** Do not block your own SSH connection, ensure you are on 22 port `sudo ufw allow 22/tcp`
-   5. `sudo ufw allow 433/tcp`
+   5. `sudo ufw allow 443/tcp` for https and `sudo ufw allow 80/tcp` for http
    6. See if configuration was added correctly `sudo ufw show added`
    7. Run `sudo ufw enable` - before double check if you are on the right port (22)
 6. Install App
@@ -116,6 +116,9 @@ Cheat sheet:
       `USERNAME` YOUR SERVER USERNAME, example: daniel
       `DOMAIN_NAME` YOUR DOMAIN NAME, example: example.com
    3. Setup action, in that case were using
+   4. Add GitHub hosts to known hosts `ssh-keyscan -H github.com >> ~/.ssh/known_hosts` then `chmod 644 ~/.ssh/known_hosts`
+
+
 
 ## Stack (needs to be updated)
 

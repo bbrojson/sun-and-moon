@@ -25,7 +25,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH Connection Successful"
       
-      - name: Deploy to VPS
+      - name: Deploy Next.js App to VPS
         run: |
           ssh -T -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             set -e
@@ -34,16 +34,24 @@ jobs:
 
             # Sprawdzenie, czy repozytorium istnieje
             if [ ! -d "/var/www/${{ secrets.DOMAIN_NAME }}/.git" ]; then
-              echo "Repo does not exist. Cloning..."
+              echo "Repozytorium nie istnieje. Klonowanie..."
               git clone git@github.com:Adam-rGz/galvanize.git /var/www/${{ secrets.DOMAIN_NAME }}
             else
-              echo "Repo exists. Downloading..."
+              echo "Repozytorium istnieje. Pobieranie najnowszych zmian..."
               cd /var/www/${{ secrets.DOMAIN_NAME }}
               git fetch --all
               git reset --hard origin/trunk
             fi
 
+            # Instalacja zależności i budowanie Next.js
             cd /var/www/${{ secrets.DOMAIN_NAME }}
-            npm install --production
-            pm2 restart all || pm2 start npm --name "app" -- run start
+            npm install
+            npm run build
+
+            # Uruchomienie aplikacji Next.js z PM2
+            pm2 delete app || true
+            pm2 start "npm run start" --name "app" --time --env production
+
+            # Zapisanie konfiguracji PM2
+            pm2 save
           EOF
