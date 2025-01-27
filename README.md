@@ -16,7 +16,7 @@ The difficulty in setting up a VPS properly does't lie in the setup itself, but 
 
 Cheat sheet:
 
-0. choose VPS, install pure version of the one and only `Ubuntu`
+0. choose VPS, install pure version of the one and only `Debian`
 1. Config new user, it is good practice to not use the root account
    1. Connect to the terminal via `ssh` command
    2. Add new user `adduser USER_NAME`
@@ -79,8 +79,8 @@ Cheat sheet:
 8. Create Github auto deploy action
    1. Set envs, go to Settings -> Secrets -> Actions -> New repository secret
       `   PRIVATE_KEY = "Copy generated private key from vps to github secret"
-HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123" 
-USERNAME = "YOUR SERVER USERNAME, example: daniel"`
+HOST = "YOUR SERVER ADDRESS, example: 'xxx.xx.xx.xxx'" 
+USERNAME = "YOUR SERVER USERNAME, example: 'app-9000'"`
    1. Setup action, example code:
       1. [needs to be detailed]
 
