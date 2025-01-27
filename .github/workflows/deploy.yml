@@ -1,0 +1,57 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - trunk
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH Key and Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Test SSH Connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH Connection Successful"
+      
+      - name: Deploy Next.js App to VPS
+        run: |
+          ssh -T -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+            set -e
+            sudo chown -R $USER:$USER /var/www/${{ secrets.DOMAIN_NAME }}
+            sudo chmod -R 755 /var/www/${{ secrets.DOMAIN_NAME }}
+
+            # Sprawdzenie, czy repozytorium istnieje
+            if [ ! -d "/var/www/${{ secrets.DOMAIN_NAME }}/.git" ]; then
+              echo "Repozytorium nie istnieje. Klonowanie..."
+              git clone git@github.com:Adam-rGz/galvanize.git /var/www/${{ secrets.DOMAIN_NAME }}
+            else
+              echo "Repozytorium istnieje. Pobieranie najnowszych zmian..."
+              cd /var/www/${{ secrets.DOMAIN_NAME }}
+              git fetch --all
+              git reset --hard origin/trunk
+            fi
+
+            # Instalacja zależności i budowanie Next.js
+            cd /var/www/${{ secrets.DOMAIN_NAME }}
+            npm install
+            npm run build
+
+            # Uruchomienie aplikacji Next.js z PM2
+            pm2 delete app || true
+            pm2 start "npm run start" --name "app" --time --env production
+
+            # Zapisanie konfiguracji PM2
+            pm2 save
+          EOF
