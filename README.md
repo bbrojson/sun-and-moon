@@ -1,10 +1,10 @@
-# San vs Moon
+# [San vs Moon](https://galvanize-ecru.vercel.app/)
 
 [![Screen](https://github.com/bbrojson/galvanize/blob/trunk/screenshot.png)](https://galvanize-ecru.vercel.app/)
 
 ## Overview
 
-Game project testing the possibility of hosting `websocket` on VPS.
+[Game project](https://galvanize-ecru.vercel.app/) testing the possibility of hosting `websocket` on VPS.
 
 This game features a minimalist one-button board where user can choose between **Sun** or **Moon**. 
 
